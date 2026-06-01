@@ -16,6 +16,7 @@ const ACHIEVEMENT_CATEGORIES = [
 ];
 const ACHIEVEMENT_PANEL_CLOSE_MS = 400;
 const DEVELOPER_MODAL_CLOSE_MS = 300;
+const CHECKIN_SUCCESS_MODAL_CLOSE_MS = 300;
 
 function formatCheckTime(ts) {
   const d = new Date(ts);
@@ -235,6 +236,9 @@ Page({
     achievementCategories: [],
     showDeveloperModal: false,
     developerOverlayVisible: false,
+    showCheckinSuccessModal: false,
+    checkinSuccessOverlayVisible: false,
+    checkinSuccessStation: '',
     developerPrefaceTitle: '开发者序言',
     developerPrefaceContent: `一切想法的开端，不过是地铁站里一张普通的线路图。
 
@@ -540,6 +544,34 @@ Qingkong
     this._closeDeveloperModal();
   },
 
+  _showCheckinSuccessModal(stationName) {
+    if (this._checkinSuccessCloseTimer) {
+      clearTimeout(this._checkinSuccessCloseTimer);
+      this._checkinSuccessCloseTimer = null;
+    }
+    this.setData({
+      checkinSuccessStation: stationName,
+      checkinSuccessOverlayVisible: true,
+      showCheckinSuccessModal: false
+    }, () => {
+      wx.nextTick(() => this.setData({ showCheckinSuccessModal: true }));
+    });
+  },
+
+  _closeCheckinSuccessModal() {
+    this.setData({ showCheckinSuccessModal: false });
+    if (this._checkinSuccessCloseTimer) clearTimeout(this._checkinSuccessCloseTimer);
+    this._checkinSuccessCloseTimer = setTimeout(() => {
+      this.setData({ checkinSuccessOverlayVisible: false, checkinSuccessStation: '' });
+      this._checkinSuccessCloseTimer = null;
+    }, CHECKIN_SUCCESS_MODAL_CLOSE_MS);
+  },
+
+  closeCheckinSuccessModal() {
+    if (!this.data.showCheckinSuccessModal) return;
+    this._closeCheckinSuccessModal();
+  },
+
   handleCheckIn() {
     const { nearestStation, nearestStations, canCheckIn } = this.data;
     if (!nearestStation || !nearestStations.length) {
@@ -569,7 +601,7 @@ Qingkong
 
     checkin.addRecord(target.id, target.name, target.line);
     this.checkAchievements();
-    wx.showToast({ title: '打卡成功！' });
+    this._showCheckinSuccessModal(target.name);
     this.loadLineData(target.line);
     if (this._lastLocation) {
       this.updateNearestFromCoords(this._lastLocation.latitude, this._lastLocation.longitude);

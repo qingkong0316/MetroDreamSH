@@ -156,4 +156,25 @@
       </view>
     </view>
   </view>
+
+  <!-- 打卡成功弹窗 -->
+  <view
+    class="checkin-success-overlay {{showCheckinSuccessModal ? 'is-open' : ''}}"
+    wx:if="{{checkinSuccessOverlayVisible || showCheckinSuccessModal}}"
+    catchtap="closeCheckinSuccessModal">
+    <view class="checkin-success-panel" catchtap="noop">
+      <view class="checkin-success-header">
+        <text class="checkin-success-title">打卡成功</text>
+        <view class="checkin-success-close" bindtap="closeCheckinSuccessModal">✕</view>
+      </view>
+      <view class="checkin-success-body">
+        <text class="checkin-success-emoji">📍</text>
+        <text class="checkin-success-station">{{checkinSuccessStation}}</text>
+        <text class="checkin-success-sub">已记录本次打卡</text>
+      </view>
+      <view class="checkin-success-footer">
+        <view class="checkin-success-btn" bindtap="closeCheckinSuccessModal">太棒了</view>
+      </view>
+    </view>
+  </view>
 </view>

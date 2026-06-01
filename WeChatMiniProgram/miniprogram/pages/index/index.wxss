@@ -169,11 +169,11 @@ page {
 }
 
 .btn-checkin-nearest[disabled] {
-  background-color: #2c2c2e;
-  color: #cccccc;
-  opacity: 0.6;
+  background-color: #141416 !important; /* 极深的背景色，沉稳不抢眼 */
+  color: #ffffff !important; /* 纯白文字，对比度直接拉满，绝对清晰 */
+  opacity: 1 !important; /* ⚠️ 关键：强制关掉透明度，让文字保持锐利 */
   box-shadow: none;
-  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.15); /* 稍微加深一点边框，勾勒出按钮轮廓 */
 }
 
 .btn-refresh {
@@ -746,4 +746,119 @@ page {
 .dev-btn-dismiss:active {
   transform: scale(0.98);
   background: #3a3a3c;
+}
+
+/* ===== 打卡成功弹窗 ===== */
+
+.checkin-success-overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 32rpx;
+  box-sizing: border-box;
+  background: rgba(15, 15, 15, 0.92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.checkin-success-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.checkin-success-panel {
+  width: 100%;
+  max-width: 560rpx;
+  display: flex;
+  flex-direction: column;
+  border-radius: 28rpx;
+  background: rgba(20, 20, 22, 0.98);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.55);
+  transform: scale(0.96) translateY(-60rpx);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+
+.checkin-success-overlay.is-open .checkin-success-panel {
+  transform: scale(1) translateY(-60rpx);
+}
+
+.checkin-success-header {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 32rpx 16rpx;
+  gap: 16rpx;
+}
+
+.checkin-success-title {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #f2f2f7;
+}
+
+.checkin-success-close {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #98989d;
+  background-color: #2c2c2e;
+  border-radius: 50%;
+}
+
+.checkin-success-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx 32rpx 32rpx;
+  gap: 12rpx;
+}
+
+.checkin-success-emoji {
+  font-size: 64rpx;
+  line-height: 1;
+}
+
+.checkin-success-station {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #32d74b;
+  text-align: center;
+  text-shadow: 0 0 24rpx rgba(50, 215, 75, 0.25);
+}
+
+.checkin-success-sub {
+  font-size: 26rpx;
+  color: #98989d;
+}
+
+.checkin-success-footer {
+  padding: 16rpx 32rpx 28rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+
+.checkin-success-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 72rpx;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #f2f2f7;
+  background: linear-gradient(180deg, rgba(44, 44, 46, 0.95), rgba(30, 30, 34, 1));
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
 }
