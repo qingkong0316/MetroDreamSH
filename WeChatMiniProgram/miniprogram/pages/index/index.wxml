@@ -1,0 +1,159 @@
+<view class="page">
+  <!-- 顶部区域 -->
+  <view class="top-section">
+    <!-- 最近 3 站 -->
+    <view class="nearest-row">
+      <view wx:if="{{locating}}" class="nearest-placeholder">📡 正在定位...</view>
+      <view wx:elif="{{nearestStations.length === 0}}" class="nearest-placeholder">⚠️ 定位失败，请重新定位</view>
+      <block wx:else>
+        <view
+          wx:for="{{nearestStations}}"
+          wx:key="id"
+          class="nearest-card-item">
+          <text class="nearest-item-name">{{item.name}}</text>
+          <text class="nearest-item-line">{{item.line}}号线</text>
+          <text class="nearest-item-dist">约 {{item.distance}} 米</text>
+        </view>
+      </block>
+    </view>
+
+    <!-- 进度区 -->
+    <view class="progress-row">
+      <view class="progress-block">
+        <view class="progress-info">
+          <text class="progress-title">🗺️ 整体打卡进度<text wx:if="{{globalProgress === 100}}"> 🎉</text></text>
+          <text class="progress-num">{{globalCheckedCount}} / {{globalTotalCount}} ({{globalProgress}}%)</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-inner" style="width: {{globalProgress}}%"></view>
+        </view>
+      </view>
+      <view class="progress-block">
+        <view class="progress-info">
+          <text class="progress-title">🚇 {{currentLine}}号线进度</text>
+          <text class="progress-num">{{checkedCount}} / {{totalCount}} ({{progress}}%)</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress-inner" style="width: {{progress}}%"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 打卡操作 -->
+    <view class="checkin-actions">
+      <button
+        class="btn-checkin-nearest"
+        bindtap="handleCheckIn"
+        disabled="{{!canCheckIn}}">
+        {{canCheckIn ? '📍 打卡' : '🔒 请靠近站点（100米内）'}}
+      </button>
+      <button class="btn-refresh" bindtap="refreshNearestStation">🔄 重新定位</button>
+    </view>
+  </view>
+
+  <!-- 主体：左栏线路 + 右栏站点 -->
+  <view class="body-section">
+    <scroll-view scroll-y="true" class="sidebar">
+      <view
+        wx:for="{{lineKeys}}"
+        wx:key="*this"
+        class="sidebar-item {{currentLine === item ? 'active' : ''}}"
+        bindtap="switchLine"
+        data-line="{{item}}">
+        {{item}}号线
+      </view>
+    </scroll-view>
+
+    <scroll-view scroll-y="true" class="main-content">
+      <block wx:for="{{stations}}" wx:key="id">
+        <view wx:if="{{item.checked}}" class="station-item checked-card" bindtap="onCheckedCardTap" data-id="{{item.id}}">
+          <view class="checked-row">
+            <text class="name-txt ellipsis">{{item.name}}</text>
+            <text class="checked-tag">✨ 已打卡 √</text>
+          </view>
+          <view class="checked-row checked-row-meta">
+            <view class="meta-left">
+              <text class="check-time">{{item.checkTimeText}}</text>
+              <text class="memo-btn" catchtap="handleMemo" data-id="{{item.id}}">📝 备注</text>
+            </view>
+            <button class="btn-undo-mini" catchtap="confirmDelete" data-id="{{item.id}}">↩️ 撤销</button>
+          </view>
+        </view>
+        <view wx:else class="station-item">
+          <text class="name-txt">{{item.name}}</text>
+        </view>
+      </block>
+
+      <view wx:if="{{stations.length === 0}}" class="empty-tip">
+        🚉 暂无站点数据
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="achievement-trigger" bindtap="toggleAchievementPage">
+    <text class="achievement-trigger-text">🏆 成就图鉴 ({{unlockedCount}}/{{achievementTotal}})</text>
+    <text class="achievement-trigger-chevron">＞</text>
+  </view>
+
+  <view
+    class="achievement-overlay {{showAchievementPage ? 'is-open' : ''}}"
+    wx:if="{{showAchievementPage || achievementOverlayVisible}}"
+    catchtap="closeAchievementPage">
+    <view class="achievement-panel" catchtap="noop">
+      <view class="achievement-panel-header">
+        <text class="achievement-panel-title">🏆 成就图鉴</text>
+        <text class="achievement-panel-count">{{unlockedCount}} / {{achievementTotal}}</text>
+        <view class="achievement-panel-close" bindtap="toggleAchievementPage">✕</view>
+      </view>
+
+      <scroll-view scroll-y class="achievement-panel-scroll" show-scrollbar="{{false}}">
+        <block wx:for="{{achievementCategories}}" wx:key="id">
+          <view class="achievement-category-card">
+            <view
+              class="achievement-category-header"
+              bindtap="toggleCategory"
+              data-id="{{item.id}}">
+              <text class="achievement-category-title">{{item.title}}</text>
+              <text class="achievement-category-meta">{{item.unlockedInSection}}/10</text>
+              <view class="achievement-category-arrow {{item.expanded ? 'is-expanded' : ''}}"></view>
+            </view>
+
+            <view wx:if="{{item.expanded}}" class="achievement-category-body">
+              <view class="achievement-grid">
+                <view
+                  wx:for="{{item.items}}"
+                  wx:for-item="ach"
+                  wx:key="id"
+                  class="achievement-card {{ach.unlocked ? 'unlocked' : 'locked'}}">
+                  <text class="ach-emoji">{{ach.emoji}}</text>
+                  <text class="ach-name">{{ach.name}}</text>
+                  <text class="ach-desc">{{ach.desc}}</text>
+                  <view wx:if="{{!ach.unlocked}}" class="achievement-card-mask"></view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+    <view class="dev-fab" catchtap="tapDeveloperModal">🌟</view>
+  </view>
+
+  <view
+    class="dev-overlay {{showDeveloperModal ? 'is-open' : ''}}"
+    wx:if="{{developerOverlayVisible || showDeveloperModal}}"
+    catchtap="closeDeveloperModal">
+    <view class="dev-panel" catchtap="noop">
+      <view class="dev-panel-header">
+        <text class="dev-panel-title">{{developerPrefaceTitle}}</text>
+        <view class="dev-panel-close" bindtap="closeDeveloperModal">✕</view>
+      </view>
+      <scroll-view scroll-y class="dev-panel-scroll" show-scrollbar="{{false}}">
+        <text class="dev-preface-text" selectable>{{developerPrefaceContent}}</text>
+      </scroll-view>
+      <view class="dev-panel-footer">
+        <view class="dev-btn-dismiss" bindtap="closeDeveloperModal">知道啦</view>
+      </view>
+    </view>
+  </view>
+</view>
